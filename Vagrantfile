@@ -16,7 +16,8 @@ Vagrant.configure('2') do |config|
   config.cache.scope = :machine
 
   config.vm.provision :shell, inline: <<-HERE
-    # install system-wide ruby
+    # install system-wide ruby and chef
+
     yum install -y zlib-devel openssl-devel
 
     cd /tmp
@@ -35,7 +36,6 @@ Vagrant.configure('2') do |config|
     make
     make install
 
-    # install chef
     gem install chef --no-rdoc --no-ri
   HERE
 
@@ -54,7 +54,8 @@ Vagrant.configure('2') do |config|
     server.vm.hostname = server_name
 
     server.vm.provision :shell, :inline => <<-HERE
-      true  # TODO
+      yum install -y #{ GO_SERVER_RPM }
+      # TODO
     HERE
   end
 
@@ -68,7 +69,8 @@ Vagrant.configure('2') do |config|
       agent.vm.hostname = agent_name
 
       agent.vm.provision :shell, :inline => <<-HERE
-        true  # TODO
+        yum install -y #{ GO_AGENT_RPM }
+        # TODO
       HERE
     end
   end
