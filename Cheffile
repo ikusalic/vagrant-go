@@ -1,0 +1,10 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+site "http://community.opscode.com/api/v1"
+
+cookbook 'yum'
+cookbook 'git', git: 'git://github.com/fnichol/chef-git.git'
+cookbook 'python'
+cookbook 'rvm', git: 'git://github.com/fnichol/chef-rvm.git'
+cookbook 'vim-setup', git: 'git://github.com/ikusalic/chef-vim-setup.git'
