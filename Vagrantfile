@@ -6,18 +6,34 @@ INSTALL_DEV_TOOLS = false
 GO_SERVER_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-server-13.4.1-18342.noarch.rpm'
 GO_AGENT_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-18342.noarch.rpm'
 
+GO_SERVER_IP = '10.42.42.101'
 GO_SERVER_SETUP = <<-HERE
   yum install -y #{ GO_SERVER_RPM }
-  # TODO
-HERE
 
+  yum install -y java-1.6.0-openjdk-devel
+  export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/
+  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' > /etc/profile.d/java.sh
+  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' >> /etc/default/go-server
+
+  chkconfig go-server on
+  service go-server start
+HERE
 GO_AGENT_SETUP = <<-HERE
   yum install -y #{ GO_AGENT_RPM }
-  # TODO
+
+  yum install -y java-1.6.0-openjdk-devel
+  export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/
+  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' > /etc/profile.d/java.sh
+  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' >> /etc/default/go-agent
+
+  sed -i.bak 's/GO_SERVER=127.0.0.1/GO_SERVER=#{ GO_SERVER_IP }/g' /etc/default/go-agent
+
+  chkconfig go-agent on
+  service go-agent start
 HERE
 
 NODES = [
-  { vm_name: :server, hostname: 'go-server', ip: '10.42.42.101', go_setup: GO_SERVER_SETUP },
+  { vm_name: :server, hostname: 'go-server', ip: GO_SERVER_IP, forward_port: 8153, go_setup: GO_SERVER_SETUP },
   { vm_name: :agent1, hostname: 'go-agent-1', ip: '10.42.42.201', go_setup: GO_AGENT_SETUP },
   { vm_name: :agent2, hostname: 'go-agent-2', ip: '10.42.42.202', go_setup: GO_AGENT_SETUP },
 ]
@@ -67,8 +83,11 @@ Vagrant.configure('2') do |config|
     config.vm.define node[:vm_name] do |node_config|
       node_config.vm.provider(:virtualbox) { |vb| vb.name = node[:vm_name].to_s }
 
-      node_config.vm.network :private_network, ip: node[:ip]
       node_config.vm.hostname = node[:hostname]
+      node_config.vm.network :private_network, ip: node[:ip]
+      if node[:forward_port]
+        node_config.vm.network "forwarded_port", guest: node[:forward_port], host: node[:forward_port]
+      end
 
       node_config.vm.provision :shell, :inline => node[:go_setup]
     end
