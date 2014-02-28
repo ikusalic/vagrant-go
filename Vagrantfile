@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+INSTALL_DEV_TOOLS = false
+
 GO_SERVER_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-server-13.4.1-18342.noarch.rpm'
 GO_AGENT_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-18342.noarch.rpm'
 
@@ -53,10 +55,12 @@ Vagrant.configure('2') do |config|
   config.cache.auto_detect = true
   config.cache.scope = :machine
 
-  config.vm.provision :shell, inline: INSTALL_CHEF
-  config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = ['.', './cookbooks']
-    chef.add_recipe 'vagrant-go-wrapper-cookbook'
+  if INSTALL_DEV_TOOLS
+    config.vm.provision :shell, inline: INSTALL_CHEF
+    config.vm.provision :chef_solo do |chef|
+      chef.cookbooks_path = ['.', './cookbooks']
+      chef.add_recipe 'vagrant-go-wrapper-cookbook'
+    end
   end
 
   NODES.each do |node|
