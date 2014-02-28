@@ -1,11 +1,11 @@
 # vagrant-go
 
-Use [Thoughtworks]'s [go] to manage continuous delivery pipelines via Vagrant.
+Use [Thoughtworks]' [go] to manage continuous delivery pipelines via Vagrant.
 
 
 ### Requirements
 
-You need to have the following installed to try out _devenv_:
+You need to have the following installed to try out _vagrant-go_:
 * [Ruby] with [bundler]
 * [Vagrant]
 * [VirtualBox], or other virtualization software that Vagrant supports
@@ -13,7 +13,7 @@ You need to have the following installed to try out _devenv_:
 
 ### Installation
 
-Install [librarina-chef] first. This dependency is specified in the `Gemfile`,
+Install [librarian-chef] first. This dependency is specified in the `Gemfile`,
 so run the following command:
 ~~~
 bundle install
@@ -29,39 +29,50 @@ Lastly, install vagrant-cachier plugin:
 vagrant plugin install vagrant-cachier
 ~~~
 
+If you want to have additional development tools installed (properly set up
+Vim, Ruby & RVM, etc.) on all the machines, set the `INSTALL_DEV_TOOLS` to
+`true` in the `Vagrantfile`. This will significantly increase cluster setup
+time, but it will happen only once.
 
-### Usage
 
-TODO
-To start the _devenv_ start the vagrant with:
+### Setting up the cluster
+
+To start the _go cluster_ start the vagrant with:
 ~~~
 vagrant up
 ~~~
 
-When you run this command for the first time, it will probably take a while as
-it needs to download the Ubuntu box. This will only happen once.
+When you run this command for the first time, it will probably take more time
+as it needs to download the CentOS box. This will only happen once.
 
-After the previous command finishes, log into the box:
+After the previous command finishes, you log into the desired machine, e.g.:
 ~~~
-vagrant ssh
+vagrant ssh server
 ~~~
 
-That's it, now you can play in your band new _devenv_.
+The go server is accessible at `127.0.0.1:8153`.
+
+Before you do anything else, do not forget to enable the agents under `agents`
+tab in go web interface.
+
+That's it, now you can play with your band new _go cluster_.
 
 
-### More information
+### Usage
 
-TODO
-For more details, check out [this post about _devenv_][blog-post].
+When the vagrant machines are running, access the go server at
+`127.0.0.1:8153`.
 
-To get a quick introduction to vagrant, check out
-[this vagrant intro post][vagrant-intro].
+When you want to temporary stop the cluster, execute `vagrant halt` to stop it
+and `vagrant up` to start it up again (just booting up the instances, no
+provisioning).
+
+To learn more on how to use the Vagrant, check the [vagrant-intro] blog post.
 
 
-[blog-post]: http://www.ikusalic.com/blog/2013/10/17/vagrant-development-environment-part-1/
 [bundler]: http://bundler.io/
 [go]: http://www.go.cd/
-[librarina-chef]: https://github.com/applicationsonline/librarian-chef
+[librarian-chef]: https://github.com/applicationsonline/librarian-chef
 [Ruby]: https://www.ruby-lang.org
 [Thoughtworks]: http://www.thoughtworks.com/
 [Vagrant]: http://www.vagrantup.com/
