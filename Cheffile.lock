@@ -1,7 +1,7 @@
 SITE
   remote: http://community.opscode.com/api/v1
   specs:
-    build-essential (1.4.2)
+    build-essential (1.4.4)
     chef_gem (0.1.0)
     python (1.4.6)
       build-essential (>= 0.0.0)
@@ -33,7 +33,7 @@ GIT
 GIT
   remote: git://github.com/ikusalic/chef-vim-setup.git
   ref: master
-  sha: 57ec592fdb670e57fb9e74953b88654763c55d1f
+  sha: 943520692e9a1679331f7626853eaccba8b2bfb7
   specs:
     vim-setup (0.1.4)
       git (>= 0.0.0)

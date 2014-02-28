@@ -1,8 +1,46 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-GO_SERVER_RPM='http://download01.thoughtworks.com/go/13.4.1/ga/go-server-13.4.1-18342.noarch.rpm'
-GO_AGENT_RPM='http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-18342.noarch.rpm'
+GO_SERVER_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-server-13.4.1-18342.noarch.rpm'
+GO_AGENT_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-18342.noarch.rpm'
+
+GO_SERVER_SETUP = <<-HERE
+  yum install -y #{ GO_SERVER_RPM }
+  # TODO
+HERE
+
+GO_AGENT_SETUP = <<-HERE
+  yum install -y #{ GO_AGENT_RPM }
+  # TODO
+HERE
+
+NODES = [
+  { vm_name: :server, hostname: 'go-server', ip: '10.42.42.101', go_setup: GO_SERVER_SETUP },
+  { vm_name: :agent1, hostname: 'go-agent-1', ip: '10.42.42.201', go_setup: GO_AGENT_SETUP },
+  { vm_name: :agent2, hostname: 'go-agent-2', ip: '10.42.42.202', go_setup: GO_AGENT_SETUP },
+]
+
+INSTALL_CHEF = <<-HERE
+  yum install -y zlib-devel openssl-devel
+
+  cd /tmp
+  curl -O http://pyyaml.org/download/libyaml/yaml-0.1.5.tar.gz
+  tar xzvf yaml-0.1.5.tar.gz
+  cd yaml-0.1.5
+  ./configure --prefix=/usr
+  make
+  make install
+
+  cd /tmp
+  curl -O ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p545.tar.gz
+  tar xzvf ruby-1.9.3-p545.tar.gz
+  cd ruby-1.9.3-p545
+  ./configure --prefix=/usr --enable-shared --disable-install-doc
+  make
+  make install
+
+  gem install chef --no-rdoc --no-ri
+HERE
 
 Vagrant.configure('2') do |config|
   config.vm.box = 'centos-65'
@@ -15,65 +53,20 @@ Vagrant.configure('2') do |config|
   config.cache.auto_detect = true
   config.cache.scope = :machine
 
-  config.vm.provision :shell, inline: <<-HERE
-    # install system-wide ruby and chef
-
-    yum install -y zlib-devel openssl-devel
-
-    cd /tmp
-    curl -O http://pyyaml.org/download/libyaml/yaml-0.1.5.tar.gz
-    tar xzvf yaml-0.1.5.tar.gz
-    cd yaml-0.1.5
-    ./configure --prefix=/usr
-    make
-    make install
-
-    cd /tmp
-    curl -O ftp://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p545.tar.gz
-    tar xzvf ruby-1.9.3-p545.tar.gz
-    cd ruby-1.9.3-p545
-    ./configure --prefix=/usr --enable-shared --disable-install-doc
-    make
-    make install
-
-    gem install chef --no-rdoc --no-ri
-  HERE
-
+  config.vm.provision :shell, inline: INSTALL_CHEF
   config.vm.provision :chef_solo do |chef|
     chef.cookbooks_path = ['.', './cookbooks']
-
     chef.add_recipe 'vagrant-go-wrapper-cookbook'
   end
 
-  config.vm.define :server do |server|
-    server_name = 'go-server'
+  NODES.each do |node|
+    config.vm.define node[:vm_name] do |node_config|
+      node_config.vm.provider(:virtualbox) { |vb| vb.name = node[:vm_name].to_s }
 
-    server.vm.provider(:virtualbox) { |vb| vb.name = server_name }
+      node_config.vm.network :private_network, ip: node[:ip]
+      node_config.vm.hostname = node[:hostname]
 
-    server.vm.network :private_network, ip: '10.42.42.101'
-    server.vm.hostname = server_name
-
-    server.vm.provision :shell, :inline => <<-HERE
-      yum install -y #{ GO_SERVER_RPM }
-      # TODO
-    HERE
-  end
-
-  def define_agent(config, agent_id)
-    config.vm.define "agent-#{ agent_id }".to_sym do |agent|
-      agent_name = "go-agent-#{ agent_id }"
-
-      agent.vm.provider(:virtualbox) { |vb| vb.name = agent_name }
-
-      agent.vm.network :private_network, ip: "10.42.42.#{ 200 + agent_id }"
-      agent.vm.hostname = agent_name
-
-      agent.vm.provision :shell, :inline => <<-HERE
-        yum install -y #{ GO_AGENT_RPM }
-        # TODO
-      HERE
+      node_config.vm.provision :shell, :inline => node[:go_setup]
     end
   end
-  define_agent config, 1
-  define_agent config, 2
 end
