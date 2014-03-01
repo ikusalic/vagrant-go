@@ -33,9 +33,9 @@ GIT
 GIT
   remote: git://github.com/ikusalic/chef-vim-setup.git
   ref: master
-  sha: 943520692e9a1679331f7626853eaccba8b2bfb7
+  sha: 3c417da7507d566bf75ee07a385eecef64fc3681
   specs:
-    vim-setup (0.1.4)
+    vim-setup (1.1.7)
       git (>= 0.0.0)
 
 DEPENDENCIES
