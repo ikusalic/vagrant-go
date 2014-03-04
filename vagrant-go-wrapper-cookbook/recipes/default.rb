@@ -4,12 +4,6 @@ include_recipe 'git'
 
 include_recipe 'python'
 
-node.override['rvm']['default_ruby']                = 'ruby-2.1.0'
-node.override['rvm']['vagrant']['system_chef_solo'] = '/opt/vagrant_ruby/bin/chef-solo'
-include_recipe 'rvm::vagrant'
-include_recipe 'rvm::system'
-include_recipe 'rvm::gem_package'
-
 node.override['vim_setup']['custom_preinstall_bash'] = <<-HERE  # build custom vim
   yum groupinstall -y 'Development Tools'
   yum install -y perl-devel python-devel perl-ExtUtils-Embed ncurses-devel

@@ -2,7 +2,6 @@ SITE
   remote: http://community.opscode.com/api/v1
   specs:
     build-essential (1.4.4)
-    chef_gem (0.1.0)
     python (1.4.6)
       build-essential (>= 0.0.0)
       yum-epel (>= 0.0.0)
@@ -23,25 +22,16 @@ GIT
       runit (>= 0.0.0)
 
 GIT
-  remote: git://github.com/fnichol/chef-rvm.git
-  ref: master
-  sha: 87f58d428c160337c1581ed1130a1a53d94e5126
-  specs:
-    rvm (0.9.1)
-      chef_gem (>= 0.0.0)
-
-GIT
   remote: git://github.com/ikusalic/chef-vim-setup.git
   ref: master
-  sha: 3c417da7507d566bf75ee07a385eecef64fc3681
+  sha: 5b9d695b717950d43b7fc448709b54cbd4a238aa
   specs:
-    vim-setup (1.1.7)
+    vim-setup (1.2.9)
       git (>= 0.0.0)
 
 DEPENDENCIES
   git (>= 0)
   python (>= 0)
-  rvm (>= 0)
   vim-setup (>= 0)
   yum (>= 0)
 
