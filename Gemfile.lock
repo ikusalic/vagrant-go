@@ -31,7 +31,7 @@ GEM
     diff-lcs (1.2.5)
     erubis (2.7.0)
     hashie (2.0.5)
-    highline (1.6.20)
+    highline (1.6.21)
     ipaddress (0.8.0)
     json (1.8.1)
     librarian (0.1.2)

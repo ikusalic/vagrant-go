@@ -2,12 +2,16 @@
 # vi: set ft=ruby :
 
 INSTALL_DEV_TOOLS = false
+CONFIGURE_GO_EXAMPLES = true
 
 GO_SERVER_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-server-13.4.1-18342.noarch.rpm'
 GO_AGENT_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-18342.noarch.rpm'
 
 GO_SERVER_IP = '10.42.42.101'
+GO_SERVER_URL = 'http://127.0.0.1:8153'
+
 GO_SERVER_SETUP = <<-HERE
+  set -e
   yum install -y #{ GO_SERVER_RPM }
 
   yum install -y java-1.6.0-openjdk-devel
@@ -19,6 +23,7 @@ GO_SERVER_SETUP = <<-HERE
   service go-server start
 HERE
 GO_AGENT_SETUP = <<-HERE
+  set -e
   yum install -y #{ GO_AGENT_RPM }
 
   yum install -y java-1.6.0-openjdk-devel
@@ -29,16 +34,18 @@ GO_AGENT_SETUP = <<-HERE
   sed -i.bak 's/GO_SERVER=127.0.0.1/GO_SERVER=#{ GO_SERVER_IP }/g' /etc/default/go-agent
 
   chkconfig go-agent on
-  service go-agent start
+  service go-agent start 2> /dev/null  # expected exception while the server is not running
 HERE
 
+SERVER = { vm_name: :server, hostname: 'go-server', ip: GO_SERVER_IP, forward_port: 8153, go_setup: GO_SERVER_SETUP }
 NODES = [
-  { vm_name: :server, hostname: 'go-server', ip: GO_SERVER_IP, forward_port: 8153, go_setup: GO_SERVER_SETUP },
   { vm_name: :agent1, hostname: 'go-agent-1', ip: '10.42.42.201', go_setup: GO_AGENT_SETUP },
   { vm_name: :agent2, hostname: 'go-agent-2', ip: '10.42.42.202', go_setup: GO_AGENT_SETUP },
+  SERVER,
 ]
 
 INSTALL_CHEF = <<-HERE
+  set -e
   yum install -y zlib-devel openssl-devel
 
   cd /tmp
@@ -58,6 +65,57 @@ INSTALL_CHEF = <<-HERE
   make install
 
   gem install chef --no-rdoc --no-ri
+HERE
+
+GO_XML_PATH = '/etc/go/cruise-config.xml'
+
+GO_EXAMPLE_TEST_REPO = '/vagrant/test-repo'
+
+GO_XML_EXAMPLES_TEMPLATE = <<-HERE
+<?xml version="1.0" encoding="utf-8"?>
+<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="69">
+  <server artifactsdir="artifacts" commandRepositoryLocation="default" serverId="$server_id" />
+  <environments>
+    <environment name="go-tests">
+      <environmentvariables>
+        <variable name="description">
+          <value>env_to_play_around_with_go</value>
+        </variable>
+        <variable name="var_with_whitespace">
+          <value>Variables can contain whitespace</value>
+        </variable>
+      </environmentvariables>
+      <agents>
+        <physical uuid="$agent1_uuid" />
+        <physical uuid="$agent2_uuid" />
+      </agents>
+    </environment>
+  </environments>
+  <agents>
+    <agent hostname="go-agent-1" ipaddress="10.0.2.15" uuid="$agent1_uuid" />
+    <agent hostname="go-agent-2" ipaddress="10.0.2.15" uuid="$agent2_uuid" />
+  </agents>
+</cruise>
+HERE
+
+GO_CONFIG_EXAMPLES = <<-HERE
+set -e
+
+mkdir -p #{ GO_EXAMPLE_TEST_REPO }
+cd #{ GO_EXAMPLE_TEST_REPO }
+git init --bare
+
+go_ids=$( python /vagrant/update_go_config.py )
+
+server_id=$( echo $go_ids | awk '{ print $1 }' )
+agent1_uuid=$( echo $go_ids | awk '{ print $2 }' )
+agent2_uuid=$( echo $go_ids | awk '{ print $3 }' )
+
+cat > #{ GO_XML_PATH } <<XMLCONF
+#{ GO_XML_EXAMPLES_TEMPLATE  }
+XMLCONF
+
+service go-server restart
 HERE
 
 Vagrant.configure('2') do |config|
@@ -89,7 +147,13 @@ Vagrant.configure('2') do |config|
         node_config.vm.network "forwarded_port", guest: node[:forward_port], host: node[:forward_port]
       end
 
-      node_config.vm.provision :shell, :inline => node[:go_setup]
+      node_config.vm.provision :shell, inline: node[:go_setup]
+    end
+  end
+
+  if CONFIGURE_GO_EXAMPLES
+    config.vm.define SERVER[:vm_name] do |server_config|
+      server_config.vm.provision :shell, inline: GO_CONFIG_EXAMPLES
     end
   end
 end
