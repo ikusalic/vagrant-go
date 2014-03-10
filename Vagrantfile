@@ -71,32 +71,7 @@ GO_XML_PATH = '/etc/go/cruise-config.xml'
 
 GO_EXAMPLE_TEST_REPO = '/vagrant/test-repo'
 
-GO_XML_EXAMPLES_TEMPLATE = <<-HERE
-<?xml version="1.0" encoding="utf-8"?>
-<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="69">
-  <server artifactsdir="artifacts" commandRepositoryLocation="default" serverId="$server_id" />
-  <environments>
-    <environment name="go-tests">
-      <environmentvariables>
-        <variable name="description">
-          <value>env_to_play_around_with_go</value>
-        </variable>
-        <variable name="var_with_whitespace">
-          <value>Variables can contain whitespace</value>
-        </variable>
-      </environmentvariables>
-      <agents>
-        <physical uuid="$agent1_uuid" />
-        <physical uuid="$agent2_uuid" />
-      </agents>
-    </environment>
-  </environments>
-  <agents>
-    <agent hostname="go-agent-1" ipaddress="10.0.2.15" uuid="$agent1_uuid" />
-    <agent hostname="go-agent-2" ipaddress="10.0.2.15" uuid="$agent2_uuid" />
-  </agents>
-</cruise>
-HERE
+GO_XML_EXAMPLES_TEMPLATE = open('go_examples_template.xml').read()
 
 GO_CONFIG_EXAMPLES = <<-HERE
 set -e
