@@ -1,20 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="69">
   <server artifactsdir="artifacts" commandRepositoryLocation="default" serverId="$server_id" />
+  <pipelines group="examples">
+    <pipeline name="make-repo-snapshot">
+      <materials>
+        <git url="/go_sf/test-repo" materialName="test-repo" />
+      </materials>
+      <stage name="logging">
+        <jobs>
+          <job name="log-push-event">
+            <tasks>
+              <exec command="bash">
+                <arg>-c</arg>
+                <arg>echo "Push detected on \$( date )." &gt;&gt; /go_sf/make-repo-snapshot.log</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+          </job>
+          <job name="log-env">
+            <tasks>
+              <exec command="/go_sf/describe_env.sh">
+                <runif status="passed" />
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="generate-artifect">
+        <jobs>
+          <job name="compress-files">
+            <tasks>
+              <exec command="bash">
+                <arg>-c</arg>
+                <arg>tar -cvzf repo-snapshot-\$( git rev-parse HEAD ).tgz *</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <artifacts>
+              <artifact src="repo-snapshot-*.tgz" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+    <pipeline name="get-repo-snapshots">
+      <materials>
+        <pipeline pipelineName="make-repo-snapshot" stageName="generate-artifect" />
+      </materials>
+      <stage name="store-download-link">
+        <jobs>
+          <job name="extract-download-link">
+            <tasks>
+              <exec command="bash">
+                <arg>-c</arg>
+                <arg>curl \$SERVER_IP:\$SERVER_PORT/go/files/\$GO_DEPENDENCY_LOCATOR_MAKE_REPO_SNAPSHOT/compress-files.json &gt; artifacts.json</arg>
+                <runif status="passed" />
+              </exec>
+              <exec command="python">
+                <arg>/go_sf/get_download_link.py</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+            <artifacts>
+              <artifact src="download-link.txt" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="download-snapshot">
+        <jobs>
+          <job name="download">
+            <tasks>
+              <fetchartifact pipeline="get-repo-snapshots" stage="store-download-link" job="extract-download-link" srcfile="download-link.txt">
+                <runif status="passed" />
+              </fetchartifact>
+              <exec command="bash">
+                <arg>-c</arg>
+                <arg>curl \$( cat download-link.txt ) -o /go_sf/snapshot.tgz</arg>
+                <runif status="passed" />
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </pipelines>
   <environments>
     <environment name="go-tests">
       <environmentvariables>
-        <variable name="description">
+        <variable name="DESCRIPTION">
           <value>env_to_play_around_with_go</value>
         </variable>
-        <variable name="var_with_whitespace">
+        <variable name="VAR_WITH_WHITESPACES">
           <value>Variables can contain whitespace</value>
+        </variable>
+        <variable name="SERVER_IP">
+          <value>10.42.42.101</value>
+        </variable>
+        <variable name="SERVER_PORT">
+          <value>8153</value>
         </variable>
       </environmentvariables>
       <agents>
         <physical uuid="$agent1_uuid" />
         <physical uuid="$agent2_uuid" />
       </agents>
+      <pipelines>
+        <pipeline name="get-repo-snapshots" />
+        <pipeline name="make-repo-snapshot" />
+      </pipelines>
     </environment>
   </environments>
   <agents>
@@ -22,3 +116,4 @@
     <agent hostname="go-agent-2" ipaddress="10.0.2.15" uuid="$agent2_uuid" />
   </agents>
 </cruise>
+

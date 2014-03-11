@@ -10,13 +10,27 @@ GO_AGENT_RPM = 'http://download01.thoughtworks.com/go/13.4.1/ga/go-agent-13.4.1-
 GO_SERVER_IP = '10.42.42.101'
 GO_SERVER_URL = 'http://127.0.0.1:8153'
 
+ADJUST_SYSTEM = <<-HERE
+sysctl -w vm.overcommit_memory=1
+echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+
+cat >> /etc/security/limits.conf <<LIMITS
+go      soft    nofile  8192
+go      hard    npofile 8192
+go      soft    nproc   8192
+go      hard    nproc   8192
+LIMITS
+
+yum install -y java-1.6.0-openjdk-devel
+export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/
+echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' > /etc/profile.d/java.sh
+HERE
+
 GO_SERVER_SETUP = <<-HERE
   set -e
   yum install -y #{ GO_SERVER_RPM }
 
-  yum install -y java-1.6.0-openjdk-devel
-  export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/
-  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' > /etc/profile.d/java.sh
+  #{ ADJUST_SYSTEM }
   echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' >> /etc/default/go-server
 
   chkconfig go-server on
@@ -26,9 +40,7 @@ GO_AGENT_SETUP = <<-HERE
   set -e
   yum install -y #{ GO_AGENT_RPM }
 
-  yum install -y java-1.6.0-openjdk-devel
-  export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/
-  echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' > /etc/profile.d/java.sh
+  #{ ADJUST_SYSTEM }
   echo 'export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0/' >> /etc/default/go-agent
 
   sed -i.bak 's/GO_SERVER=127.0.0.1/GO_SERVER=#{ GO_SERVER_IP }/g' /etc/default/go-agent
@@ -68,10 +80,8 @@ INSTALL_CHEF = <<-HERE
 HERE
 
 GO_XML_PATH = '/etc/go/cruise-config.xml'
-
-GO_EXAMPLE_TEST_REPO = '/vagrant/test-repo'
-
 GO_XML_EXAMPLES_TEMPLATE = open('go_examples_template.xml').read()
+GO_EXAMPLE_TEST_REPO = '/go_sf/test-repo'
 
 GO_CONFIG_EXAMPLES = <<-HERE
 set -e
@@ -103,6 +113,8 @@ Vagrant.configure('2') do |config|
 
   config.cache.auto_detect = true
   config.cache.scope = :machine
+
+  config.vm.synced_folder 'go_sf', '/go_sf', owner: 'go', group: 'go'
 
   if INSTALL_DEV_TOOLS
     config.vm.provision :shell, inline: INSTALL_CHEF

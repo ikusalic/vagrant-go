@@ -41,6 +41,6 @@ node.override['vim_setup']['build_from_source'] = true
 node.override['vim_setup']['vundle_timeout'] = 1000
 node.override['vim_setup']['dotfiles_repo'] = 'https://github.com/ikusalic/dotfiles.git'
 node.override['vim_setup']['global_vimrc'] = false
-node.override['vim_setup']['users'] = [ 'vagrant' ]
+node.override['vim_setup']['users'] = [ 'root', 'vagrant', 'go' ]
 node.override['vim_setup']['use_vundle'] = true
 include_recipe 'vim-setup'
