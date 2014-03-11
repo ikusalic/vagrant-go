@@ -35,6 +35,30 @@ Vim, Ruby & RVM, etc.) on all the machines, set the `INSTALL_DEV_TOOLS` to
 time, but it will happen only once.
 
 
+### Go examples
+
+If the `CONFIGURE_GO_EXAMPLES` flag is set (default), _Go_ will be configured
+with some initial example settings.
+
+Example pipelines and more will be configured. The pipelines can be triggered
+with git push or manually. To do so, push something to `go_sf/test-repo`, the
+local bare git repository created in provisioning process.
+
+To push current repository's master, run:
+~~~
+git push go_sf/test-repo master
+~~~
+
+The pipelines demonstrate some of the capabilities of _Go_:
+
+* triggering pipelines
+* chaining pipelines
+* managing artifacts
+* etc.
+
+For more details, take a look at the pipelines themselves.
+
+
 ### Setting up the cluster
 
 To start the _go cluster_ start the vagrant with:
