@@ -4,7 +4,7 @@
   <pipelines group="examples">
     <pipeline name="make-repo-snapshot">
       <materials>
-        <git url="/go_sf/test-repo" materialName="test-repo" />
+        <git url="/vagrant/test-repo" materialName="test-repo" />
       </materials>
       <stage name="logging">
         <jobs>
@@ -12,14 +12,14 @@
             <tasks>
               <exec command="bash">
                 <arg>-c</arg>
-                <arg>echo "Push detected on \$( date )." &gt;&gt; /go_sf/make-repo-snapshot.log</arg>
+                <arg>echo "Push detected on \$( date )." &gt;&gt; /vagrant/results/make-repo-snapshot.log</arg>
                 <runif status="passed" />
               </exec>
             </tasks>
           </job>
           <job name="log-env">
             <tasks>
-              <exec command="/go_sf/describe_env.sh">
+              <exec command="/vagrant/describe_env.sh">
                 <runif status="passed" />
               </exec>
             </tasks>
@@ -57,7 +57,7 @@
                 <runif status="passed" />
               </exec>
               <exec command="python">
-                <arg>/go_sf/get_download_link.py</arg>
+                <arg>/vagrant/get_download_link.py</arg>
                 <runif status="passed" />
               </exec>
             </tasks>
@@ -76,7 +76,7 @@
               </fetchartifact>
               <exec command="bash">
                 <arg>-c</arg>
-                <arg>curl \$( cat download-link.txt ) -o /go_sf/snapshot.tgz</arg>
+                <arg>curl \$( cat download-link.txt ) -o /vagrant/results/snapshot.tgz</arg>
                 <runif status="passed" />
               </exec>
             </tasks>

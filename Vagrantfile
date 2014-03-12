@@ -81,10 +81,12 @@ HERE
 
 GO_XML_PATH = '/etc/go/cruise-config.xml'
 GO_XML_EXAMPLES_TEMPLATE = open('go_examples_template.xml').read()
-GO_EXAMPLE_TEST_REPO = '/go_sf/test-repo'
+GO_EXAMPLE_TEST_REPO = '/vagrant/test-repo'
 
 GO_CONFIG_EXAMPLES = <<-HERE
 set -e
+
+mkdir -p /vagrant/results
 
 mkdir -p #{ GO_EXAMPLE_TEST_REPO }
 cd #{ GO_EXAMPLE_TEST_REPO }
@@ -114,7 +116,7 @@ Vagrant.configure('2') do |config|
   config.cache.auto_detect = true
   config.cache.scope = :machine
 
-  config.vm.synced_folder 'go_sf', '/go_sf', owner: 'go', group: 'go'
+  config.vm.synced_folder '.', '/vagrant', mount_options: ['dmode=777', 'fmode=777']
 
   if INSTALL_DEV_TOOLS
     config.vm.provision :shell, inline: INSTALL_CHEF

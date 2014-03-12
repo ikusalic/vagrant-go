@@ -41,12 +41,16 @@ If the `CONFIGURE_GO_EXAMPLES` flag is set (default), _Go_ will be configured
 with some initial example settings.
 
 Example pipelines and more will be configured. The pipelines can be triggered
-with git push or manually. To do so, push something to `go_sf/test-repo`, the
+with git push or manually. To do so, push something to `test-repo`, the
 local bare git repository created in provisioning process.
+
+All the interaction between host and VMs is happening through `/vagrant`
+directory on VMs that is shared folder for this repository on host (directory
+containing `Vagrantfile`).
 
 To push current repository's master, run:
 ~~~
-git push go_sf/test-repo master
+git push test-repo master
 ~~~
 
 The pipelines demonstrate some of the capabilities of _Go_:

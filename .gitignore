@@ -3,6 +3,5 @@
 cookbooks/
 tmp/
 
-go_sf/test-repo/
-go_sf/*.log
-go_sf/*.tgz
+test-repo/
+results/
