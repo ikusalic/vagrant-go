@@ -69,7 +69,7 @@ INSTALL_CHEF = <<-HERE
   make install
 
   cd /tmp
-  curl -O ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.1.tar.gz
+  curl -O http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.1.tar.gz
   tar xzvf ruby-2.1.1.tar.gz
   cd ruby-2.1.1
   ./configure --prefix=/usr --enable-shared --disable-install-doc
@@ -118,14 +118,6 @@ Vagrant.configure('2') do |config|
 
   config.vm.synced_folder '.', '/vagrant', mount_options: ['dmode=777', 'fmode=777']
 
-  if INSTALL_DEV_TOOLS
-    config.vm.provision :shell, inline: INSTALL_CHEF
-    config.vm.provision :chef_solo do |chef|
-      chef.cookbooks_path = ['.', './cookbooks']
-      chef.add_recipe 'vagrant-go-wrapper-cookbook'
-    end
-  end
-
   NODES.each do |node|
     config.vm.define node[:vm_name] do |node_config|
       node_config.vm.provider(:virtualbox) { |vb| vb.name = node[:vm_name].to_s }
@@ -143,6 +135,14 @@ Vagrant.configure('2') do |config|
   if CONFIGURE_GO_EXAMPLES
     config.vm.define SERVER[:vm_name] do |server_config|
       server_config.vm.provision :shell, inline: GO_CONFIG_EXAMPLES
+    end
+  end
+
+  if INSTALL_DEV_TOOLS
+    config.vm.provision :shell, inline: INSTALL_CHEF
+    config.vm.provision :chef_solo do |chef|
+      chef.cookbooks_path = ['.', './cookbooks']
+      chef.add_recipe 'vagrant-go-wrapper-cookbook'
     end
   end
 end

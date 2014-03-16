@@ -32,7 +32,8 @@ vagrant plugin install vagrant-cachier
 If you want to have additional development tools installed (properly set up
 Vim, Ruby & RVM, etc.) on all the machines, set the `INSTALL_DEV_TOOLS` to
 `true` in the `Vagrantfile`. This will significantly increase cluster setup
-time, but it will happen only once.
+time, but it will happen only once. This feature is currently still
+experimental.
 
 
 ### Go examples
