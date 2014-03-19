@@ -106,8 +106,10 @@ service go-server restart
 HERE
 
 Vagrant.configure('2') do |config|
-  config.vm.box = 'centos-65'
-  config.vm.box_url = 'https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box'
+  centos_version = '6.5.3'
+  vagrant_centos_version = '20140116'
+  config.vm.box = "centos-#{centos_version}-#{vagrant_centos_version}"
+  config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v#{centos_version}/centos65-x86_64-#{vagrant_centos_version}.box"
 
   config.vm.provider :virtualbox do |vb|
     vb.customize [ 'modifyvm', :id, '--memory', '1024' ]
