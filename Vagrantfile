@@ -112,7 +112,7 @@ Vagrant.configure('2') do |config|
   config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v#{centos_version}/centos65-x86_64-#{vagrant_centos_version}.box"
 
   config.vm.provider :virtualbox do |vb|
-    vb.customize [ 'modifyvm', :id, '--memory', '1024' ]
+    vb.customize [ 'modifyvm', :id, '--memory', '2048' ]
   end
 
   config.cache.auto_detect = true
