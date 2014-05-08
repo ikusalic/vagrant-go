@@ -2,6 +2,9 @@
 
 Use [Thoughtworks]' [go] to manage continuous delivery pipelines via Vagrant.
 
+You probably want to read this [blog post][post] first. It explains motivation
+and even has some nice pictures of the repo in action.
+
 
 ### Requirements
 
@@ -102,6 +105,7 @@ To learn more on how to use the Vagrant, check the [vagrant-intro] blog post.
 [bundler]: http://bundler.io/
 [go]: http://www.go.cd/
 [librarian-chef]: https://github.com/applicationsonline/librarian-chef
+[post]: http://www.ikusalic.com/blog/2014/03/12/using-thoughtworks-go-continuous-delivery-with-vagrant/
 [Ruby]: https://www.ruby-lang.org
 [Thoughtworks]: http://www.thoughtworks.com/
 [Vagrant]: http://www.vagrantup.com/
